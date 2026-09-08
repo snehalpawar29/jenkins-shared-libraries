@@ -1,9 +1,8 @@
 #!/usr/bin/env groovy
 
 def call(Map config = [:]){
-    // Resolve configurations and provide safe defaults
     def imageTag = config.imageTag ?: error("Image Tag Required")
-    def manifestsPath = config.manifestsPath ?: 'kubernetes' // Note: corrected parameter name spelling to match your Jenkinsfile
+    def manifestsPath = config.manifestsPath ?: 'kubernetes' 
     def gitCredentials = config.gitCredentials ?: 'github-credentials'
     def gitUserEmail = config.gitUserEmail ?: 'snehalpawar2945@gmail.com'
     def gitUserName = config.gitUserName ?: 'snehalpawar29'
@@ -16,8 +15,6 @@ def call(Map config = [:]){
         passwordVariable: 'GIT_PASSWORD'
     )]) {
 
-        // Use single quotes (''') to pass variables directly to the shell environment securely
-        // We inject the non-sensitive parameters into the shell environment first
         withEnv([
             "TARGET_TAG=${imageTag}",
             "MANIFEST_PATH=${manifestsPath}",
@@ -25,12 +22,18 @@ def call(Map config = [:]){
             "GIT_CONFIG_EMAIL=${gitUserEmail}"
         ]) {
             sh '''
-                # 1. Verify we are in a valid Git repo; if not, configure locally anyway or track down workspace
+                # 1. Look for the sub-folder if the root directory is empty
                 if [ ! -d ".git" ]; then
-                    echo "WARNING: .git directory not found in current folder. Attempting step recovery..."
+                    if [ -d "EasyShop/.git" ]; then
+                        echo "Found repository inside 'EasyShop' directory. Shifting execution context..."
+                        cd EasyShop
+                    else
+                        echo "ERROR: Could not find a valid .git directory anywhere in the workspace workspace."
+                        exit 1
+                    fi
                 fi
 
-                # 2. Configure Git parameters using shell evaluation (No Groovy interpolation leaks)
+                # 2. Configure Git parameters securely via shell evaluation
                 git config user.name "$GIT_CONFIG_NAME"
                 git config user.email "$GIT_CONFIG_EMAIL"
 
@@ -41,16 +44,16 @@ def call(Map config = [:]){
                     sed -i "s|image: snehalpawar2945/easyshop-migration:.*|image: snehalpawar2945/easyshop-migration:${TARGET_TAG}|g" ${MANIFEST_PATH}/migration-job.yml
                 fi
 
-                # 4. Check for changes, commit, and push changes securely
+                # 4. Check for changes, commit, and push modifications back to the master repository
                 if git diff --quiet; then
                     echo "No change to commit"
+                    exit 0
                 fi
                 
                 git add ${MANIFEST_PATH}/*.yml
                 git commit -m "Update images tags to ${TARGET_TAG} and ensure correct domain [ci skip]"
                 
-                # Use git credentials bound by withCredentials securely via shell injection
-                git remote set-url origin "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/snehalpawar29/EasyShop-E-Commerce-App.git"
+                git remote set-url origin "https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com"
                 git push origin HEAD:main
             '''
         }
