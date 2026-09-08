@@ -53,7 +53,7 @@ def call(Map config = [:]){
                 git add ${MANIFEST_PATH}/*.yml
                 git commit -m "Update images tags to ${TARGET_TAG} and ensure correct domain [ci skip]"
                 
-                git remote set-url origin "https://${GIT_USERNAME}:${GIT_PASSWORD}@://github.com"
+                git remote set-url origin https://\${GIT_USERNAME}:\${GIT_PASSWORD}@github.com/snehalpawar29/EasyShop.git
                 git push origin HEAD:main
             '''
         }
