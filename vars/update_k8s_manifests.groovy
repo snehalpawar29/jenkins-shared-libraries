@@ -24,9 +24,9 @@ def call(Map config = [:]){
             sh '''
                 # 1. Look for the sub-folder if the root directory is empty
                 if [ ! -d ".git" ]; then
-                    if [ -d "EasyShop/.git" ]; then
-                        echo "Found repository inside 'EasyShop' directory. Shifting execution context..."
-                        cd EasyShop
+                    if [ -d "wanderlust-devops-automation/.git" ]; then
+                        echo "Found repository inside 'wanderlust-devops-automation' directory. Shifting execution context..."
+                        cd wanderlust-devops-automation
                     else
                         echo "ERROR: Could not find a valid .git directory anywhere in the workspace workspace."
                         exit 1
@@ -38,10 +38,10 @@ def call(Map config = [:]){
                 git config user.email "$GIT_CONFIG_EMAIL"
 
                 # 3. Update the deployment manifest files
-                sed -i "s|image: snehalpawar2945/easyshop:.*|image: snehalpawar2945/easyshop:${TARGET_TAG}|g" ${MANIFEST_PATH}/easyshop-deployment.yml
+                sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" ${MANIFEST_PATH}/frontend-deployment.yaml
 
                 if [ -f "${MANIFEST_PATH}/migration-job.yml" ]; then
-                    sed -i "s|image: snehalpawar2945/easyshop-migration:.*|image: snehalpawar2945/easyshop-migration:${TARGET_TAG}|g" ${MANIFEST_PATH}/migration-job.yml
+                    sed -i "s|image: snehalpawar2945/wanderlust-backend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" ${MANIFEST_PATH}/backend-deployment.yaml
                 fi
 
                 # 4. Check for changes, commit, and push modifications back to the master repository
@@ -53,7 +53,7 @@ def call(Map config = [:]){
                 git add ${MANIFEST_PATH}/*.yml
                 git commit -m "Update images tags to ${TARGET_TAG} and ensure correct domain [ci skip]"
                 
-                git remote set-url origin https://\${GIT_USERNAME}:\${GIT_PASSWORD}@github.com/snehalpawar29/EasyShop.git
+                git remote set-url origin https://\${GIT_USERNAME}:\${GIT_PASSWORD}@github.com/snehalpawar29/wanderlust-devops-automation.git
                 git push origin HEAD:main
             '''
         }
