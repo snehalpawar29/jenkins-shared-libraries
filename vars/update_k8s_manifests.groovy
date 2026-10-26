@@ -40,7 +40,7 @@ def call(Map config = [:]){
                 # 3. Update the deployment manifest files
                 sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" ${MANIFEST_PATH}/frontend-deployment.yaml
 
-                if [ -f "${MANIFEST_PATH}/migration-job.yml" ]; then
+                if [ -f "${MANIFEST_PATH}/wanderlust-backend.yaml" ]; then
                     sed -i "s|image: snehalpawar2945/wanderlust-backend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" ${MANIFEST_PATH}/backend-deployment.yaml
                 fi
 
@@ -50,7 +50,7 @@ def call(Map config = [:]){
                     exit 0
                 fi
                 
-                git add ${MANIFEST_PATH}/*.yml
+                git add ${MANIFEST_PATH}/*.yaml
                 git commit -m "Update images tags to ${TARGET_TAG} and ensure correct domain [ci skip]"
                 
                 git remote set-url origin https://\${GIT_USERNAME}:\${GIT_PASSWORD}@github.com/snehalpawar29/wanderlust-devops-automation.git
