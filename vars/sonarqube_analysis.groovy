@@ -1,5 +1,5 @@
 def call(String serverName, String projectKey, String projectName) {
-    def scannerHome = tool 'SonarScanner'
+    def scannerHome = tool 'SonarQube'
 
     dir('wanderlust-devops-automation') {
         withSonarQubeEnv(serverName) {
