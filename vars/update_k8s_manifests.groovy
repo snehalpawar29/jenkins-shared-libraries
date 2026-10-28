@@ -38,16 +38,19 @@ def call(Map config = [:]){
                 git config user.email "$GIT_CONFIG_EMAIL"
 
                 # 3. Update the deployment manifest files
-                sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" ${MANIFEST_PATH}/frontend-deployment.yaml
-
+                if [ -f "${MANIFEST_PATH}/frontend-deployment.yaml" ]; then
+                    sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" "${MANIFEST_PATH}/frontend-deployment.yaml"
+                fi
                 if [ -f "${MANIFEST_PATH}/wanderlust-frontend.yaml" ]; then
-                    sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" ${MANIFEST_PATH}/frontend-deployment.yaml
+                    sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-frontend:${TARGET_TAG}|g" "${MANIFEST_PATH}/wanderlust-frontend.yaml"
                 fi
 
-                sed -i "s|image: snehalpawar2945/wanderlust-backtend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" ${MANIFEST_PATH}/backend-deployment.yaml
-
-                if [ -f "${MANIFEST_PATH}/wanderlust-frontend.yaml" ]; then
-                    sed -i "s|image: snehalpawar2945/wanderlust-frontend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" ${MANIFEST_PATH}/backend-deployment.yaml
+                # Backend updates
+                if [ -f "${MANIFEST_PATH}/backend-deployment.yaml" ]; then
+                    sed -i "s|image: snehalpawar2945/wanderlust-backend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" "${MANIFEST_PATH}/backend-deployment.yaml"
+                fi
+                if [ -f "${MANIFEST_PATH}/wanderlust-backend.yaml" ]; then
+                    sed -i "s|image: snehalpawar2945/wanderlust-backend:.*|image: snehalpawar2945/wanderlust-backend:${TARGET_TAG}|g" "${MANIFEST_PATH}/wanderlust-backend.yaml"
                 fi
                 # 4. Check for changes, commit, and push modifications back to the master repository
                 if git diff --quiet; then
