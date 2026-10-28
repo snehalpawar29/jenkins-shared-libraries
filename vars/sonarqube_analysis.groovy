@@ -1,5 +1,14 @@
-def call(String SonarQubeAPI, String projectName, String projectKey){
-	withSonarQubeEnv("${SonarQubeAPI}"){
-		sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=${projectName} -Dsonar.projectKey=${projectKey} -Dsonar.java.binaries=. -X"
-	}
+def call(String serverName, String projectKey, String projectName) {
+    def scannerHome = tool 'SonarScanner'
+
+    dir('wanderlust-devops-automation') {
+        withSonarQubeEnv(serverName) {
+            sh """
+                "${scannerHome}/bin/sonar-scanner" \
+                    -Dsonar.projectKey="${projectKey}" \
+                    -Dsonar.projectName="${projectName}" \
+                    -Dsonar.sources=.
+            """
+        }
+    }
 }
